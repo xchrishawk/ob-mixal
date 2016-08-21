@@ -15,11 +15,18 @@
 
 ;; -- Org Babel Required Functions --
 
-(defun org-babel-expand-body:mixal (body params)
-  nil)
+(defun org-babel-expand-body:mixal (body params &optional processed-params)
+  "Processes the MIXAL code in BODY using PARAMS."
+  ;; Add a newline to the end of the file
+  (concat body "\n"))
 
 (defun org-babel-execute:mixal (body params)
-  nil)
+  "Executes the MIXAL code in BODY using PARAMS."
+  (let* ((processed-params (org-babel-process-params params))
+	 (expanded-body (org-babel-expand-body:mixal body params processed-params))
+	 (mix-file (ob-mixal--compile expanded-body)))
+    (when mix-file
+      (ob-mixal--run mix-file))))
 
 (defun org-babel-prep-session:mixal (session params)
   (error "MIXAL does not currently support sessions."))
@@ -48,3 +55,16 @@ output from the mixasm process."
 	    (compilation-mode))
 	  (pop-to-buffer stderr-buffer)
 	  nil)))))
+
+(defun ob-mixal--run (file)
+  "Runs the specified compiled MIX file in mixvm, and returns the results."
+  (with-temp-buffer
+    (call-process ob-mixal--mixvm-command	; execute mixvm
+		  nil				; no stdin
+		  (current-buffer)		; stdout to current buffer
+		  nil				; don't display
+		  "-d"				; dump VM status at end of run
+		  "-t"				; dump timing status
+		  "-r"				; run in batch mode
+		  file)				; input file name
+    (buffer-string)))
