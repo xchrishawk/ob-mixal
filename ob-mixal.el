@@ -26,7 +26,9 @@
 	 (expanded-body (org-babel-expand-body:mixal body params processed-params))
 	 (mix-file (ob-mixal--compile expanded-body)))
     (when mix-file
-      (ob-mixal--run mix-file))))
+      (prog1
+	  (ob-mixal--run mix-file)
+	(delete-file mix-file)))))
 
 (defun org-babel-prep-session:mixal (session params)
   (error "MIXAL does not currently support sessions."))
@@ -47,14 +49,19 @@ output from the mixasm process."
       (insert body))
     ;; Compile the MIXAL file
     (with-temp-buffer
-      (if (zerop (shell-command compile-cmd nil (current-buffer)))
-	  mix-file
-	(let ((stderr-buffer (generate-new-buffer "*mixasm*")))
-	  (copy-to-buffer stderr-buffer (point-min) (point-max))
-	  (with-current-buffer stderr-buffer
-	    (compilation-mode))
-	  (pop-to-buffer stderr-buffer)
-	  nil)))))
+      (prog1
+	  (if (zerop (shell-command compile-cmd nil (current-buffer)))
+	      ;; Compilation succeeded - return the binary
+	      mix-file
+	    ;; Compilation failed - show buffer to user and return nil
+	    (let ((stderr-buffer (generate-new-buffer "*mixasm*")))
+	      (copy-to-buffer stderr-buffer (point-min) (point-max))
+	      (with-current-buffer stderr-buffer
+		(compilation-mode))
+	      (pop-to-buffer stderr-buffer)
+	      nil))
+	;; Before we go, clean up the mixal file
+	(delete-file mixal-file)))))
 
 (defun ob-mixal--run (file)
   "Runs the specified compiled MIX file in mixvm, and returns the results."
