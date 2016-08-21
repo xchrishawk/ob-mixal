@@ -7,10 +7,10 @@
 
 ;; -- Variables --
 
-(defvar ob-mixal--mixasm-command "/usr/bin/mixasm"
+(defvar ob-mixal--mixasm-path "/usr/bin/mixasm"
   "The path to the mixasm installation on this machine.")
 
-(defvar ob-mixal--mixvm-command "/usr/bin/mixvm"
+(defvar ob-mixal--mixvm-path "/usr/bin/mixvm"
   "The path to the mixvm installation on this machine.")
 
 ;; -- Org Babel Required Functions --
@@ -41,7 +41,7 @@ output from the mixasm process."
   ;; Generate needed file names and arguments
   (let* ((mixal-file (make-temp-file "ob-mixal-" nil ".mixal"))
 	 (mix-file (make-temp-file "ob-mixal-" nil ".mix"))
-	 (compile-cmd (format "%s %s -o %s" ob-mixal--mixasm-command mixal-file mix-file)))
+	 (compile-cmd (format "%s %s -o %s" ob-mixal--mixasm-path mixal-file mix-file)))
     ;; Build the MIXAL file
     (with-temp-file mixal-file
       (insert body))
@@ -59,7 +59,7 @@ output from the mixasm process."
 (defun ob-mixal--run (file)
   "Runs the specified compiled MIX file in mixvm, and returns the results."
   (with-temp-buffer
-    (call-process ob-mixal--mixvm-command	; execute mixvm
+    (call-process ob-mixal--mixvm-path		; execute mixvm
 		  nil				; no stdin
 		  (current-buffer)		; stdout to current buffer
 		  nil				; don't display
