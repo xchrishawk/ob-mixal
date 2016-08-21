@@ -17,7 +17,7 @@
 
 (defun org-babel-expand-body:mixal (body params &optional processed-params)
   "Processes the MIXAL code in BODY using PARAMS."
-  ;; Add a newline to the end of the file
+  ;; Add a newline to the end of the file, since mixasm requires this
   (concat body "\n"))
 
 (defun org-babel-execute:mixal (body params)
