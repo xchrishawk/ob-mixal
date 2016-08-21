@@ -58,13 +58,29 @@ output from the mixasm process."
 
 (defun ob-mixal--run (file)
   "Runs the specified compiled MIX file in mixvm, and returns the results."
-  (with-temp-buffer
-    (call-process ob-mixal--mixvm-path		; execute mixvm
-		  nil				; no stdin
-		  (current-buffer)		; stdout to current buffer
-		  nil				; don't display
-		  "-d"				; dump VM status at end of run
-		  "-t"				; dump timing status
-		  "-r"				; run in batch mode
-		  file)				; input file name
-    (buffer-string)))
+  (let ((mixvm-script (make-temp-file "ob-mixal-" nil ".mixvm")))
+    ;; Build script with commands in temporary file
+    (with-temp-file mixvm-script
+      (insert "load " file "\n")
+      (insert "run\n")
+      (insert "pall\n")
+      (insert "quit\n"))
+    ;; Run process and get stdout in a temporary buffer
+    (with-temp-buffer
+      (call-process ob-mixal--mixvm-path mixvm-script (current-buffer))
+      (delete-file mixvm-script)
+      ;; Postprocess the results to format them nicely
+      (ob-mixal--replace-all "^MIX\> load \\([[:graph:]]+\\).*$" "* Input *\n\\1")
+      (ob-mixal--replace-all "^MIX\> run" "\n* Output *")
+      (ob-mixal--replace-all "Elapsed time:" "\n* Time *\nElapsed time:")
+      (ob-mixal--replace-all "^MIX\> pall" "\n* Final VM State *")
+      (ob-mixal--replace-all "\nMIX\> quit\nQuitting \.\.\." "")
+      ;; Return the resulting text
+      (buffer-string))))
+
+(defun ob-mixal--replace-all (regexp replacement)
+  "Replaces all strings matching REGEXP in the current buffer with REPLACEMENT."
+  (save-excursion
+    (goto-char (point-min))
+    (while (re-search-forward regexp nil t)
+      (replace-match replacement))))
