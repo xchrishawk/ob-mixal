@@ -82,16 +82,16 @@ output from the mixasm process."
       (prog1
 	  (if (zerop (shell-command compile-cmd nil (current-buffer)))
 	      ;; Compilation succeeded - return the binary
-	      mix-file
+	      (progn
+		(delete-file mixal-file)
+		mix-file)
 	    ;; Compilation failed - show buffer to user and return nil
 	    (let ((stderr-buffer (generate-new-buffer "*mixasm*")))
 	      (copy-to-buffer stderr-buffer (point-min) (point-max))
 	      (with-current-buffer stderr-buffer
 		(compilation-mode))
 	      (pop-to-buffer stderr-buffer)
-	      nil))
-	;; Before we go, clean up the mixal file
-	(delete-file mixal-file)))))
+	      nil))))))
 
 (defun ob-mixal--run (file)
   "Runs the specified compiled MIX file in mixvm, and returns the results."
