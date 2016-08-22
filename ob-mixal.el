@@ -114,6 +114,9 @@ output from the mixasm process."
 	  ("input" nil)
 	  ("output" nil)
 	  ("time" nil)
+	  ("all" (insert "pall\n"))
+	  ("rA" (insert "preg A\n"))
+	  ("rX" (insert "preg X\n"))
 	  (other (user-error "Invalid output requested: %s" other))))
       (insert "quit\n"))
     script))
@@ -131,6 +134,12 @@ output from the mixasm process."
       (ob-mixal--replace "Elapsed\\(.*\\)\n"
 			 (and (member "time" requested-outputs)
 			      "= Time =\nElapsed\\1\n\n"))
+      (ob-mixal--replace "^MIX\> pall\n\\([[:graph:][:space:]\n]*\\)Cmp: \\(.\\)\n"
+			 "= Machine State =\n\\1Cmp: \\2\n\n")
+      (ob-mixal--replace "^MIX\> preg A\n\\(.*\\)\n"
+			 "= Register A =\n\\1\n\n")
+      (ob-mixal--replace "^MIX\> preg X\n\\(.*\\)\n"
+			 "= Register X =\n\\1\n\n")
       (ob-mixal--replace "^MIX\> quit\nQuitting \.\.\.\n")
       (delete-trailing-whitespace)
       (buffer-string))))
