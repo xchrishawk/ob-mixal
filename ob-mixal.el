@@ -57,7 +57,7 @@
 	 (mix-file (ob-mixal--compile expanded-body)))
     (when mix-file
       (prog1
-	  (ob-mixal--run mix-file)
+	  (ob-mixal--run mix-file processed-params)
 	(delete-file mix-file)))))
 
 (defun org-babel-prep-session:mixal (session params)
@@ -93,31 +93,42 @@ output from the mixasm process."
 	      (pop-to-buffer stderr-buffer)
 	      nil))))))
 
-(defun ob-mixal--run (file)
+(defun ob-mixal--run (file processed-params)
   "Runs the specified compiled MIX file in mixvm, and returns the results."
-  (let ((mixvm-script (make-temp-file "ob-mixal-" nil ".mixvm")))
-    ;; Build script with commands in temporary file
-    (with-temp-file mixvm-script
+  (let ((script (ob-mixal--build-script file processed-params)))
+    (with-temp-buffer
+      (prog2
+	  (call-process ob-mixal--mixvm-path script (current-buffer))
+	  (ob-mixal--postprocess-results (current-buffer) processed-params)
+	(delete-file script)))))
+
+(defun ob-mixal--build-script (file processed-params)
+  "Builds a mixvm script running FILE using the :mixvm arg from PROCESSED-PARAMS."
+  (let* ((script (make-temp-file "ob-mixal-" nil ".mixvm"))
+	 (mixvm-param (cdr (assoc :mixvm processed-params)))
+	 (requested-outputs (and mixvm-param (split-string mixvm-param))))
+    (with-temp-file script
       (insert "load " file "\n")
       (insert "run\n")
-      (insert "pall\n")
+      (dolist (output requested-outputs)
+	(pcase output
+	  ("input" nil)
+	  ("output" nil)
+	  ("time" nil)
+	  (other (user-error "Invalid output requested: %s" other))))
       (insert "quit\n"))
-    ;; Run process and get stdout in a temporary buffer
-    (with-temp-buffer
-      (call-process ob-mixal--mixvm-path mixvm-script (current-buffer))
-      (delete-file mixvm-script)
-      ;; Postprocess the results to format them nicely
-      (ob-mixal--replace-all "^MIX\> load \\([[:graph:]]+\\).*$" "= Input =\n\\1")
-      (ob-mixal--replace-all "^MIX\> run" "\n= Output =")
-      (ob-mixal--replace-all "Elapsed time:" "\n= Time =\nElapsed time:")
-      (ob-mixal--replace-all "^MIX\> pall" "\n= Final MIX State =")
-      (ob-mixal--replace-all "\nMIX\> quit\nQuitting \.\.\." "")
-      ;; Return the resulting text
-      (buffer-string))))
+    script))
 
-(defun ob-mixal--replace-all (regexp replacement)
-  "Replaces all strings matching REGEXP in the current buffer with REPLACEMENT."
+(defun ob-mixal--postprocess-results (buffer processed-params)
+  "Post-processes mixvm results in BUFFER using PROCESSED-PARAMS."
+  (with-current-buffer buffer
+    (ob-mixal--replace "^MIX\> quit\nQuitting \.\.\.\n")
+    (buffer-string)))
+
+(defun ob-mixal--replace (regexp &optional replacement)
+  "Replaces text matching REGEXP in current buffer if REPLACEMENT is not `nil', or
+deletes it completely if REPLACEMENT is `nil'."
   (save-excursion
     (goto-char (point-min))
     (while (re-search-forward regexp nil t)
-      (replace-match replacement))))
+      (replace-match (if replacement replacement "")))))
