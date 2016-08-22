@@ -17,8 +17,38 @@
 
 (defun org-babel-expand-body:mixal (body params &optional processed-params)
   "Processes the MIXAL code in BODY using PARAMS."
-  ;; Add a newline to the end of the file, since mixasm requires this
-  (concat body "\n"))
+  ;; Process parameters if we don't already have processed parameters
+  (or processed-params
+      (setq processed-params (org-babel-process-params params)))
+  (let ((vars nil)
+	(macros nil))
+    ;; Get lists of variables and macros
+    (dolist (param processed-params)
+      (when (eq (car param) :var)
+	(let ((key (format "%s" (cadr param)))
+	      (value (format "%s" (cddr param))))
+	  (cond
+	   ((string-match "^[A-Z]+$" key) (push (cons key value) vars))
+	   ((string-match "^%[A-Z]+%$" key) (push (cons key value) macros))
+	   (t (user-error "Invalid var name: %s" key))))))
+    ;; Assemble source in temporary buffer
+    (with-temp-buffer
+      ;; First, insert the body as is
+      (insert body)
+      ;; Expand each macro
+      (dolist (macro macros)
+	(goto-char (point-min))
+	(while (re-search-forward (regexp-quote (car macro)) nil t)
+	  (replace-match (cdr macro) nil nil)))
+      ;; Insert vars as EQU directives at beginning of file
+      (goto-char (point-min))
+      (dolist (var (reverse vars))
+	(insert (format "%s\tEQU\t%s\n" (car var) (cdr var))))
+      ;; Insert a newline at the end of the file (mixasm requires this)
+      (goto-char (point-max))
+      (newline)
+      ;; Finally, return the completed buffer
+      (buffer-string))))
 
 (defun org-babel-execute:mixal (body params)
   "Executes the MIXAL code in BODY using PARAMS."
