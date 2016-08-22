@@ -105,8 +105,7 @@ output from the mixasm process."
 (defun ob-mixal--build-script (file processed-params)
   "Builds a mixvm script running FILE using the :mixvm arg from PROCESSED-PARAMS."
   (let* ((script (make-temp-file "ob-mixal-" nil ".mixvm"))
-	 (mixvm-param (cdr (assoc :mixvm processed-params)))
-	 (requested-outputs (and mixvm-param (split-string mixvm-param))))
+	 (requested-outputs (ob-mixal--requested-outputs processed-params)))
     (with-temp-file script
       (insert "load " file "\n")
       (insert "run\n")
@@ -121,9 +120,25 @@ output from the mixasm process."
 
 (defun ob-mixal--postprocess-results (buffer processed-params)
   "Post-processes mixvm results in BUFFER using PROCESSED-PARAMS."
-  (with-current-buffer buffer
-    (ob-mixal--replace "^MIX\> quit\nQuitting \.\.\.\n")
-    (buffer-string)))
+  (let ((requested-outputs (ob-mixal--requested-outputs processed-params)))
+    (with-current-buffer buffer
+      (ob-mixal--replace "^MIX\> load \\([[:graph:]]+\\)\n\\(.*\\)\n"
+			 (and (member "input" requested-outputs)
+			      "= Input =\n\\1\n\\2\n\n"))
+      (ob-mixal--replace "^MIX\> run\nRunning \.\.\.\n\\([.\n]*\\)\.\.\. done\n"
+			 (and (member "output" requested-outputs)
+			      "= Output =\nRunning ...\n\\1... done\n\n"))
+      (ob-mixal--replace "Elapsed\\(.*\\)\n"
+			 (and (member "time" requested-outputs)
+			      "= Time =\nElapsed\\1\n\n"))
+      (ob-mixal--replace "^MIX\> quit\nQuitting \.\.\.\n")
+      (delete-trailing-whitespace)
+      (buffer-string))))
+
+(defun ob-mixal--requested-outputs (processed-params)
+  "Gets the requested outputs from PROCESSED-PARAMS as a list of strings."
+  (let ((mixvm-param (cdr (assoc :mixvm processed-params))))
+    (and mixvm-param (split-string mixvm-param))))
 
 (defun ob-mixal--replace (regexp &optional replacement)
   "Replaces text matching REGEXP in current buffer if REPLACEMENT is not `nil', or
