@@ -107,10 +107,10 @@ output from the mixasm process."
       (call-process ob-mixal--mixvm-path mixvm-script (current-buffer))
       (delete-file mixvm-script)
       ;; Postprocess the results to format them nicely
-      (ob-mixal--replace-all "^MIX\> load \\([[:graph:]]+\\).*$" "* Input *\n\\1")
-      (ob-mixal--replace-all "^MIX\> run" "\n* Output *")
-      (ob-mixal--replace-all "Elapsed time:" "\n* Time *\nElapsed time:")
-      (ob-mixal--replace-all "^MIX\> pall" "\n* Final MIX State *")
+      (ob-mixal--replace-all "^MIX\> load \\([[:graph:]]+\\).*$" "= Input =\n\\1")
+      (ob-mixal--replace-all "^MIX\> run" "\n= Output =")
+      (ob-mixal--replace-all "Elapsed time:" "\n= Time =\nElapsed time:")
+      (ob-mixal--replace-all "^MIX\> pall" "\n= Final MIX State =")
       (ob-mixal--replace-all "\nMIX\> quit\nQuitting \.\.\." "")
       ;; Return the resulting text
       (buffer-string))))
