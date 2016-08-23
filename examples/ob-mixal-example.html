@@ -1,0 +1,461 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<title>MIXAL Org Babel Example</title>
+<!-- 2016-08-22 Mon 19:55 -->
+<meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta  name="generator" content="Org-mode" />
+<meta  name="author" content="Chris Vig" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { color: green; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  pre.src-sh:before    { content: 'sh'; }
+  pre.src-bash:before  { content: 'sh'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-R:before     { content: 'R'; }
+  pre.src-perl:before  { content: 'Perl'; }
+  pre.src-java:before  { content: 'Java'; }
+  pre.src-sql:before   { content: 'SQL'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.right  { text-align: center;  }
+  th.left   { text-align: center;   }
+  th.center { text-align: center; }
+  td.right  { text-align: right;  }
+  td.left   { text-align: left;   }
+  td.center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara:nth-child(2) { display: inline; }
+  .footpara { display: block; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  /*]]>*/-->
+</style>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2013 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">MIXAL Org Babel Example</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#sec-1">1. Introduction</a></li>
+<li><a href="#sec-2">2. Background</a></li>
+<li><a href="#sec-3">3. Example Usage</a>
+<ul>
+<li><a href="#sec-3-1">3.1. Problem</a></li>
+<li><a href="#sec-3-2">3.2. Source Code</a></li>
+<li><a href="#sec-3-3">3.3. Generating Output</a></li>
+<li><a href="#sec-3-4">3.4. Running the Code</a>
+<ul>
+<li><a href="#sec-3-4-1">3.4.1. <code>LDAN 3000</code></a></li>
+<li><a href="#sec-3-4-2">3.4.2. <code>LD2N 3000(3:4)</code></a></li>
+<li><a href="#sec-3-4-3">3.4.3. <code>LDX 3000(1:3)</code></a></li>
+<li><a href="#sec-3-4-4">3.4.4. <code>LDXN 3000(0:0)</code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#sec-4">4. Conclusion</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-sec-1" class="outline-2">
+<h2 id="sec-1"><span class="section-number-2">1</span> Introduction</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+This folder contains an example showing how to use <a href="http://orgmode.org/worg/org-contrib/babel/">Org-Mode Babel</a> in <a href="https://www.gnu.org/software/emacs/">Emacs</a> for
+development in the MIX progamming language. The relevant files are:
+</p>
+
+<dl class="org-dl">
+<dt> ob-mixal-example.org </dt><dd>This file. If viewing this on Github, you may want to
+use the "raw" view so you can see the source code for the document.
+</dd>
+<dt> ob-mixal-example.html </dt><dd>An HTML file exported by Org mode for this document.
+</dd>
+</dl>
+</div>
+</div>
+
+<div id="outline-container-sec-2" class="outline-2">
+<h2 id="sec-2"><span class="section-number-2">2</span> Background</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+<a href="https://en.wikipedia.org/wiki/MIX">MIX</a> is a mythical computer invented by Donald Knuth for use in the legendary
+monograph <a href="https://en.wikipedia.org/wiki/The_Art_of_Computer_Programming">The Art of Computer Programming</a> (TAOCP). The computer uses a simple
+assembly language, known as MIXAL.
+</p>
+
+<p>
+Since MIX is a hypothetical computer, we have to rely on a software "virtual
+machine" to run our code. One example of such a virtual machine is the <a href="https://www.gnu.org/software/mdk/">GNU MDK</a>
+project, which features an assembler, virtual machine (including GUI), and
+excellent support for coding and debugging in Emacs. <code>ob-racket</code> depends on MDK
+to compile and run code - you will need it installed to make any use of this
+package.
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-3" class="outline-2">
+<h2 id="sec-3"><span class="section-number-2">3</span> Example Usage</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+As an example, we'll do one of the early exercises in volume 1 of TAOCP, to show
+how <code>ob-mixal</code> makes it easy to integrate text, code, and output. Let's take a
+look at exercise 6, from section 1.3.1.
+</p>
+</div>
+
+<div id="outline-container-sec-3-1" class="outline-3">
+<h3 id="sec-3-1"><span class="section-number-3">3.1</span> Problem</h3>
+<div class="outline-text-3" id="text-3-1">
+<p>
+Assume that location 3000 contains:
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="right">0</th>
+<th scope="col" class="right">1</th>
+<th scope="col" class="right">2</th>
+<th scope="col" class="right">3-4</th>
+<th scope="col" class="right">5</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="right">+</td>
+<td class="right">5</td>
+<td class="right">1</td>
+<td class="right">200</td>
+<td class="right">15</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+What is the result of the following instructions? (State if any of them are
+undefined or only partially defined).
+</p>
+
+<ul class="org-ul">
+<li><code>LDAN 3000</code>
+</li>
+<li><code>LD2N 3000(3:4)</code>
+</li>
+<li><code>LDX 3000(1:3)</code>
+</li>
+<li><code>LDXN 3000(0:0)</code>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-sec-3-2" class="outline-3">
+<h3 id="sec-3-2"><span class="section-number-3">3.2</span> Source Code</h3>
+<div class="outline-text-3" id="text-3-2">
+<p>
+First, let's write a short program to test this out.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-mixal" id="example_mixasm">	ORIG    3000
+	CON     VALUE
+START   %INST%  %ADDR%
+	HLT
+	END     START
+</pre>
+</div>
+
+<p>
+The Org code for the above block looks like this:
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-org">#+NAME: example_mixasm
+#+BEGIN_SRC mixal :exports code
+	  ORIG    3000
+	  CON     VALUE
+  START   %INST%  %ADDR%
+	  HLT
+	  END     START
+#+END_SRC
+</pre>
+</div>
+
+<p>
+A couple of points on the above block:
+</p>
+
+<ul class="org-ul">
+<li>We set the <b><code>:exports</code></b> header arg to <code>code</code>, so that only the source code is
+included in the HTML output.
+</li>
+<li>We're using a symbolic constant, <code>VALUE</code>, to refer to the value of address 3000.
+We're also using two macros, <code>%INST%</code> and <code>%ADDR%</code>, to refer to the instruction
+we're going to test and its address.
+</li>
+<li>We didn't bother to set <code>VALUE</code>, <code>%INST%</code>, or <code>%ADDR%</code> in this block since we're
+not going to execute it directly.
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-sec-3-3" class="outline-3">
+<h3 id="sec-3-3"><span class="section-number-3">3.3</span> Generating Output</h3>
+<div class="outline-text-3" id="text-3-3">
+<p>
+We use the <b><code>:noweb</code></b> syntax to <i>include</i> the above code block in the Babel blocks
+that we actually want to run. Here's an example of what this looks like.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-org">#+BEGIN_SRC mixal :noweb yes :exports results :mixvm rA :var %INST%="LDAN" %ADDR%="3000" VALUE="5(1:1),1(2:2),200(3:4),15(5:5)"
+&lt;&lt;example_mixasm&gt;&gt;
+#+END_SRC
+</pre>
+</div>
+
+<p>
+Couple of comments:
+</p>
+
+<ul class="org-ul">
+<li>Setting <b><code>:noweb</code></b> to <code>yes</code> enables the noweb syntax using the angle brackets.
+This includes the <code>example_mixasm</code> code block that we defined above.
+</li>
+<li>We set the <b><code>:exports</code></b> header arg to <code>results</code>. We only want to export the
+results of this block, not the source code.
+</li>
+<li>The <b><code>:mixvm</code></b> header argument is custom to <code>ob-mixal</code>. It provides a list of
+output values that we want to see in the output. In this case, we're only
+asking for the value of <code>rA</code> (the accumulator register) at the end of the
+program. See the README for a full list of allowable outputs.
+</li>
+<li>We set the values of the <code>%INST%</code> and <code>%ADDR%</code> macros, and the <code>VALUE</code> symbolic
+constant, using the standard Babel <b><code>:var</code></b> header argument.
+<ul class="org-ul">
+<li>Macros do a textual replace on the body of the code, just like a standard
+C pre-processor. They must consist of all capital letters, surrounded by <code>%</code>
+symbols.
+</li>
+<li>Symbolic constants are defined using EQU instructions at the beginning of the
+code block. They must consist of all capital letters and be undecorated.
+</li>
+</ul>
+</li>
+</ul>
+
+<p>
+If you place point anywhere in the code block, and then press <code>C-c C-v v</code>, Babel
+will expand the code block and show the results in a buffer. You can use this to
+troubleshoot any issues you're having with your code. Here's what the above codey
+block expands to:
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-mixal">VALUE   EQU     5(1:1),1(2:2),200(3:4),15(5:5)
+	ORIG    3000
+	CON     VALUE
+START   LDAN  3000
+	HLT
+	END     START
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-3-4" class="outline-3">
+<h3 id="sec-3-4"><span class="section-number-3">3.4</span> Running the Code</h3>
+<div class="outline-text-3" id="text-3-4">
+<p>
+So now we're ready to answer the initial question. Here are the outputs we get
+from <b><code>mixvm</code></b> for each instruction/address pair listed above.
+</p>
+</div>
+
+<div id="outline-container-sec-3-4-1" class="outline-4">
+<h4 id="sec-3-4-1"><span class="section-number-4">3.4.1</span> <code>LDAN 3000</code></h4>
+<div class="outline-text-4" id="text-3-4-1">
+<pre class="example">
+= Register A =
+rA: - 05 01 03 08 15 (0084161039)
+</pre>
+</div>
+</div>
+
+<div id="outline-container-sec-3-4-2" class="outline-4">
+<h4 id="sec-3-4-2"><span class="section-number-4">3.4.2</span> <code>LD2N 3000(3:4)</code></h4>
+<div class="outline-text-4" id="text-3-4-2">
+<pre class="example">
+= Register I2 =
+rI2: - 03 08 (0200)
+</pre>
+</div>
+</div>
+
+<div id="outline-container-sec-3-4-3" class="outline-4">
+<h4 id="sec-3-4-3"><span class="section-number-4">3.4.3</span> <code>LDX 3000(1:3)</code></h4>
+<div class="outline-text-4" id="text-3-4-3">
+<pre class="example">
+= Register X =
+rX: + 00 00 05 01 03 (0000020547)
+</pre>
+</div>
+</div>
+
+<div id="outline-container-sec-3-4-4" class="outline-4">
+<h4 id="sec-3-4-4"><span class="section-number-4">3.4.4</span> <code>LDXN 3000(0:0)</code></h4>
+<div class="outline-text-4" id="text-3-4-4">
+<pre class="example">
+= Register X =
+rX: - 00 00 00 00 00 (0000000000)
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-4" class="outline-2">
+<h2 id="sec-4"><span class="section-number-2">4</span> Conclusion</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+This document gives a simple example of how to use <code>ob-mixal</code> in conjunction with
+GNU MDK. I hope you find it useful.
+</p>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: Chris Vig</p>
+<p class="date">Created: 2016-08-22 Mon 19:55</p>
+<p class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.5.1 (<a href="http://orgmode.org">Org</a> mode 8.2.10)</p>
+<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>
