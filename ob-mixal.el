@@ -110,14 +110,17 @@ output from the mixasm process."
       (insert "load " file "\n")
       (insert "run\n")
       (dolist (output requested-outputs)
-	(pcase output
-	  ("input" nil)
-	  ("output" nil)
-	  ("time" nil)
-	  ("all" (insert "pall\n"))
-	  ("rA" (insert "preg A\n"))
-	  ("rX" (insert "preg X\n"))
-	  (other (user-error "Invalid output requested: %s" other))))
+	(cond
+	 ;; Default outputs
+	 ((member output '("input" "output" "time")) nil)
+	 ;; MIX machine state at end of run
+	 ((string= output "all") (insert "pall\n"))
+	 ;; A, X, or J register
+	 ((string-match "r\\([AXJ]\\)" output) (insert (format "preg %s\n" (match-string 1 output))))
+	 ;; Index register
+	 ((string-match "rI\\([1-6]\\)" output) (insert (format "preg I%s\n" (match-string 1 output))))
+	 ;; Unknown output
+	 (t (user-error "Invalid output requested: %s" output))))
       (insert "quit\n"))
     script))
 
@@ -125,21 +128,25 @@ output from the mixasm process."
   "Post-processes mixvm results in BUFFER using PROCESSED-PARAMS."
   (let ((requested-outputs (ob-mixal--requested-outputs processed-params)))
     (with-current-buffer buffer
+      ;; load instruction
       (ob-mixal--replace "^MIX\> load \\([[:graph:]]+\\)\n\\(.*\\)\n"
-			 (and (member "input" requested-outputs)
-			      "= Input =\n\\1\n\\2\n\n"))
+			 (and (member "input" requested-outputs) "= Input =\n\\1\n\\2\n\n"))
+      ;; run instruction
       (ob-mixal--replace "^MIX\> run\nRunning \.\.\.\n\\([.\n]*\\)\.\.\. done\n"
-			 (and (member "output" requested-outputs)
-			      "= Output =\nRunning ...\n\\1... done\n\n"))
+			 (and (member "output" requested-outputs) "= Output =\nRunning ...\n\\1... done\n\n"))
+      ;; Timing information
       (ob-mixal--replace "Elapsed\\(.*\\)\n"
-			 (and (member "time" requested-outputs)
-			      "= Time =\nElapsed\\1\n\n"))
+			 (and (member "time" requested-outputs) "= Time =\nElapsed\\1\n\n"))
+      ;; pall instruction
       (ob-mixal--replace "^MIX\> pall\n\\([[:graph:][:space:]\n]*\\)Cmp: \\(.\\)\n"
 			 "= Machine State =\n\\1Cmp: \\2\n\n")
-      (ob-mixal--replace "^MIX\> preg A\n\\(.*\\)\n"
-			 "= Register A =\n\\1\n\n")
-      (ob-mixal--replace "^MIX\> preg X\n\\(.*\\)\n"
-			 "= Register X =\n\\1\n\n")
+      ;; preg A/X/J instruction
+      (ob-mixal--replace "^MIX\> preg \\([AXJ]\\)\n\\(.*\\)\n"
+			 "= Register \\1 =\n\\2\n\n")
+      ;; preg I1-6 instruction
+      (ob-mixal--replace "^MIX\> preg I\\([1-6]\\)\n\\(.*\\)\n"
+			 "= Register I\\1 =\n\\2\n\n")
+      ;; quit instruction
       (ob-mixal--replace "^MIX\> quit\nQuitting \.\.\.\n")
       (delete-trailing-whitespace)
       (buffer-string))))
