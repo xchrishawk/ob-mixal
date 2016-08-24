@@ -109,45 +109,64 @@ output from the mixasm process."
     (with-temp-file script
       (insert "load " file "\n")
       (insert "run\n")
-      (dolist (output requested-outputs)
-	(cond
-	 ;; Default outputs
-	 ((member output '("input" "output" "time")) nil)
-	 ;; MIX machine state at end of run
-	 ((string= output "all") (insert "pall\n"))
-	 ;; A, X, or J register
-	 ((string-match "r\\([AXJ]\\)" output) (insert (format "preg %s\n" (match-string 1 output))))
-	 ;; Index register
-	 ((string-match "rI\\([1-6]\\)" output) (insert (format "preg I%s\n" (match-string 1 output))))
-	 ;; Unknown output
-	 (t (user-error "Invalid output requested: %s" output))))
+      (dolist (command (mapcar 'ob-mixal--script-command-for-output requested-outputs))
+	(when command
+	  (insert (format "%s\n" command))))
       (insert "quit\n"))
     script))
+
+(defun ob-mixal--script-command-for-output (output)
+  "Get a mixvm script command for OUTPUT."
+  (cond
+   ;; Default outputs - no command required
+   ((member output '("input" "output" "time"))
+    nil)
+   ;; Mix machine state at end of run
+   ((string= output "all")
+    "pall")
+   ;; Register
+   ((string-match "r\\([AXJ]\\|I[1-6]\\)" output)
+    (format "preg %s" (match-string 1 output)))
+   ;; Memory location
+   ((string-match "^m\\([0-9]\\{1,3\\}\\|[0-3][0-9]\\{3\\}\\)\\(-m\\([0-9]\\{1,3\\}\\|[0-3][0-9]\\{3\\}\\)\\)*$" output)
+    (let ((mem1 (match-string 1 output))
+	  (mem2 (match-string 3 output)))
+      (if mem2 (format "pmem %s-%s" mem1 mem2) (format "pmem %s" mem1))))
+   ;; Unknown output?
+   (t (user-error "Invalid output requested: %s" output))))
 
 (defun ob-mixal--postprocess-results (buffer processed-params)
   "Post-processes mixvm results in BUFFER using PROCESSED-PARAMS."
   (let ((requested-outputs (ob-mixal--requested-outputs processed-params)))
     (with-current-buffer buffer
       ;; load instruction
-      (ob-mixal--replace "^MIX\> load \\([[:graph:]]+\\)\n\\(.*\\)\n"
-			 (and (member "input" requested-outputs) "= Input =\n\\1\n\\2\n\n"))
+      (ob-mixal--replace
+       "^MIX\> load \\([[:graph:]]+\\)\n\\(.*\\)\n"
+       (and (member "input" requested-outputs) "= Input =\n\\1\n\\2\n\n"))
       ;; run instruction
-      (ob-mixal--replace "^MIX\> run\nRunning \.\.\.\n\\([.\n]*\\)\.\.\. done\n"
-			 (and (member "output" requested-outputs) "= Output =\nRunning ...\n\\1... done\n\n"))
+      (ob-mixal--replace
+       "^MIX\> run\nRunning \.\.\.\n\\([.\n]*\\)\.\.\. done\n"
+       (and (member "output" requested-outputs) "= Output =\nRunning ...\n\\1... done\n\n"))
       ;; Timing information
-      (ob-mixal--replace "Elapsed\\(.*\\)\n"
-			 (and (member "time" requested-outputs) "= Time =\nElapsed\\1\n\n"))
+      (ob-mixal--replace
+       "^Elapsed\\(.*\\)\n"
+       (and (member "time" requested-outputs) "= Time =\nElapsed\\1\n\n"))
       ;; pall instruction
-      (ob-mixal--replace "^MIX\> pall\n\\([[:graph:][:space:]\n]*\\)Cmp: \\(.\\)\n"
-			 "= Machine State =\n\\1Cmp: \\2\n\n")
-      ;; preg A/X/J instruction
-      (ob-mixal--replace "^MIX\> preg \\([AXJ]\\)\n\\(.*\\)\n"
-			 "= Register \\1 =\n\\2\n\n")
-      ;; preg I1-6 instruction
-      (ob-mixal--replace "^MIX\> preg I\\([1-6]\\)\n\\(.*\\)\n"
-			 "= Register I\\1 =\n\\2\n\n")
+      (ob-mixal--replace
+       "^MIX\> pall\n\\([[:graph:][:space:]\n]*\\)Cmp: \\(.\\)\n"
+       "= Machine State =\n\\1Cmp: \\2\n\n")
+      ;; preg instructions
+      (ob-mixal--replace
+       "^MIX\> preg \\([AXJ]\\|I[1-6]\\)\n\\(.*\\)\n"
+       "= Register \\1 =\n\\2\n\n")
+      ;; pmem instructions
+      (ob-mixal--replace
+       "^MIX\> pmem \\([0-9]\\{1,4\\}\\|[0-9]\\{1,4\\}-[0-9]\\{1,4\\}\\)\n\\([[:graph:][:space:]\n]*?\\)\n\\(MIX\\|=\\)"
+       "= Memory \\1 =\n\\2\n\n\\3")
       ;; quit instruction
-      (ob-mixal--replace "^MIX\> quit\nQuitting \.\.\.\n")
+      (ob-mixal--replace
+       "^MIX\> quit\nQuitting \.\.\.\n")
+      ;; Clean up and return buffer string
       (delete-trailing-whitespace)
       (buffer-string))))
 
@@ -159,7 +178,10 @@ output from the mixasm process."
 (defun ob-mixal--replace (regexp &optional replacement)
   "Replaces text matching REGEXP in current buffer if REPLACEMENT is not `nil', or
 deletes it completely if REPLACEMENT is `nil'."
+  (or replacement (setq replacement ""))
   (save-excursion
     (goto-char (point-min))
     (while (re-search-forward regexp nil t)
-      (replace-match (if replacement replacement "")))))
+      (replace-match replacement)
+      (goto-char (+ (match-beginning 0) (length replacement))))
+    (message (buffer-string))))
