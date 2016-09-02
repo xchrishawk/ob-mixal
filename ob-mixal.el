@@ -145,7 +145,7 @@ output from the mixasm process."
        (and (member "input" requested-outputs) "= Input =\n\\1\n\\2\n\n"))
       ;; run instruction
       (ob-mixal--replace
-       "^MIX\> run\nRunning \.\.\.\n\\([.\n]*\\)\.\.\. done\n"
+       "^MIX\> run\nRunning \.\.\.\n\\([[:graph:][:space:]\n]*\\)\.\.\. done\n"
        (and (member "output" requested-outputs) "= Output =\nRunning ...\n\\1... done\n\n"))
       ;; Timing information
       (ob-mixal--replace
