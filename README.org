@@ -18,10 +18,62 @@ to allow compiling and running MIXAL source code directly from Org mode in Emacs
    '((mixal . t)))
 #+END_SRC
 
-** Example Org File
+- You may need to configure the =ob-mixal--mixasm-path= and =ob-mixal--mixvm-path=
+  variables if you have installed MDK to a non-standard location.
+
+** Simple Example
+
+This is an example Org mode block using MIXAL:
+
+#+NAME: example-code
+#+BEGIN_SRC org
+  ,#+NAME: helloworld
+  ,#+BEGIN_SRC mixal :tangle hello.mixal :exports both :mixvm output time
+    MAIN    OUT     MSG(19)
+            HLT
+
+    MSG     ALF     "HELLO"
+            ALF     " WORL"
+            ALF     "D    "
+
+            END     MAIN
+  ,#+END_SRC
+#+END_SRC
+
+You can place the cursor anywhere in the code block and press =C-c C-c= to
+execute the block. A results block will be placed below, which in this case will
+look like this:
+
+#+NAME: example-result
+#+BEGIN_SRC org
+  ,#+RESULTS: helloworld
+  : = Output =
+  : Running ...
+  : HELLO WORLD
+  : ... done
+  :
+  : = Time =
+  : Elapsed time: 11 /Total program time: 11 (Total uptime: 11)
+#+END_SRC
+
+** Comprehensive Example
 
 There is an example Org file with a more comprehensive example showing how to use
 *ob-mixal* located at [[examples/ob-mixal-example.org]].
+
+** Supported Outputs
+
+You specify outputs using the custom =:mixvm= header argument to the Org code
+block. The following outputs are supported:
+
+- =input= - prints the command used to run the block
+- =output= - prints standard output from mixvm
+- =time= - prints timing information
+- =rA=, =rX=, =rI1=, =rI2=, =rI3=, =rI4=, =rI5=, =rI6= - prints the state of the
+  corresponding register when the code block is finished running
+- =m0= - prints the state of memory address 0 (the address can be changed obviously)
+- =m0-m10= - prints the state of memory addresses 0 - 10.
+- =all= - prints the state of all registers and flags.
 
 ** Author
 
