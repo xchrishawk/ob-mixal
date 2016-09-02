@@ -1,0 +1,28 @@
+* ob-mixal
+
+** Introduction
+
+*ob-mixal* is an [[http://orgmode.org/worg/org-contrib/babel/][Org Babel]] language module for the [[https://en.wikipedia.org/wiki/MIX][MIXAL programming language]],
+the language used by the imaginary MIX architecture in Donald Knuth's classic
+[[https://en.wikipedia.org/wiki/The_Art_of_Computer_Programming][The Art of Computer Programming]]. It interfaces with the [[https://www.gnu.org/software/mdk/][GNU MIX Development Kit (MDK)]]
+to allow compiling and running MIXAL source code directly from Org mode in Emacs.
+
+** Installation and Setup
+
+- Clone this repo to somewhere in your Emacs [[https://www.gnu.org/software/emacs/manual/html_node/elisp/Library-Search.html][load path]].
+- Add the following to your =.emacs= file:
+
+#+BEGIN_SRC emacs-lisp
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((mixal . t)))
+#+END_SRC
+
+** Example Org File
+
+There is an example Org file with a more comprehensive example showing how to use
+*ob-mixal* located at [[examples/ob-mixal-example.org]].
+
+** Author
+
+Chris Vig (chris@invictus.so)
